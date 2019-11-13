@@ -611,8 +611,12 @@ impl Postman {
                                 .ok()
                         }) {
                             Some(state_proof_bs) => {
-                                let buf: Vec<u8> = state_proof_bs.into_iter().flatten().collect();
-                                response.set_state_proof(buf);
+                                let mut s = rlp::RlpStream::new();
+                                s.begin_list(state_proof_bs.len());
+                                state_proof_bs.into_iter().for_each(|value| {
+                                    s.append(&value);
+                                });
+                                response.set_state_proof(s.out());
                             }
                             None => {
                                 response.set_code(ErrorCode::query_error());
